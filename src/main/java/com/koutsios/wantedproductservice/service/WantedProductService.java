@@ -7,4 +7,5 @@ public interface WantedProductService {
 
   WantedProduct createWantedProduct(String wishlistId, NewWantedProduct newWantedProduct);
 
+  WantedProduct getWantedProduct(String wantedProductId);
 }

@@ -4,7 +4,9 @@ import static com.koutsios.wantedproductservice.fixture.WantedProductFixture.aNe
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,10 +64,52 @@ class WantedProductServiceIntegrationTest extends AbstractIntegrationTestWithMon
     assertEquals(wantedProductResponse.getStatus(), wantedProductDb.getStatus());
   }
 
+  @Test
+  @DisplayName("Given a wanted product id then return wanted product")
+  void getWantedProduct_success() throws Exception {
+    String wishlistId = "wishlistId";
+    NewWantedProduct newWantedProduct = aNewWantedProduct();
+    String wantedProductId = generatedWantedProductId(wishlistId, newWantedProduct);
+
+    String response = mockMvc.perform(get("/wanted/{wantedProductId}", wantedProductId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$", notNullValue()))
+        .andExpect(jsonPath("$.id", is(wantedProductId)))
+        .andExpect(jsonPath("$.wishlistId", is(wishlistId)))
+        .andExpect(jsonPath("$.name", is(newWantedProduct.getName())))
+        .andExpect(jsonPath("$.productDetailsLink", is(newWantedProduct.getProductDetailsLink())))
+        .andExpect(jsonPath("$.status", is(newWantedProduct.getStatus().toString())))
+        .andReturn().getResponse().getContentAsString();
+    WantedProduct wantedProductResponse = objectMapper.readValue(response, WantedProduct.class);
+
+    WantedProduct wantedProductDb = repository.findById(wantedProductId).orElseThrow();
+    assertEquals(wantedProductResponse.getWishlistId(), wantedProductDb.getWishlistId());
+    assertEquals(wantedProductResponse.getName(), wantedProductDb.getName());
+    assertEquals(wantedProductResponse.getProductDetailsLink(), wantedProductDb.getProductDetailsLink());
+    assertEquals(wantedProductResponse.getStatus(), wantedProductDb.getStatus());
+  }
+
+  @Test
+  @DisplayName("Given a wanted product id when invalid then return 404 not found")
+  void getWantedProduct_invalidWantedProductId_404NotFound() throws Exception {
+    String wantedProductId = "InvalidId";
+
+    mockMvc.perform(get("/wanted/{wantedProductId}", wantedProductId))
+        .andExpect(status().isNotFound())
+        .andExpect(content().string("Could find Wishlist " + wantedProductId));
+  }
+
   private ResultActions createWantedProduct(String wishlistId, NewWantedProduct newWantedProduct) throws Exception {
     return mockMvc.perform(post("/wanted/{wishlistId}", wishlistId)
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(newWantedProduct)));
+  }
+
+  private String generatedWantedProductId(String wishlistId, NewWantedProduct newWantedProduct) throws Exception {
+    String response = createWantedProduct(wishlistId, newWantedProduct)
+        .andExpect(status().isCreated())
+        .andReturn().getResponse().getContentAsString();
+    return objectMapper.readValue(response, WantedProduct.class).getId();
   }
 
 }
