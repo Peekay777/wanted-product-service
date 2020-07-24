@@ -7,9 +7,9 @@ import com.koutsios.wantedproductservice.dto.NewWantedProduct;
 
 public class WantedProductFixture {
 
-  public static WantedProduct aWantedProduct() {
+  public static WantedProduct aWantedProduct(String id) {
     return WantedProduct.builder()
-        .id("generatedId")
+        .id(id)
         .wishlistId("wishlistId")
         .name("ProductName")
         .productDetailsLink("http://an.example.com/product")

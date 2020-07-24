@@ -6,6 +6,7 @@ import static org.springframework.http.HttpStatus.OK;
 import com.koutsios.wantedproductservice.domain.WantedProduct;
 import com.koutsios.wantedproductservice.dto.NewWantedProduct;
 import com.koutsios.wantedproductservice.service.WantedProductService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +23,7 @@ public class WantedProductController {
   @Autowired
   private WantedProductService wantedProductService;
 
-  @PostMapping("/{wishlistId}")
+  @PostMapping("/wishlist/{wishlistId}")
   @ResponseStatus(CREATED)
   public WantedProduct createWantedProduct(@PathVariable String wishlistId,
                                            @RequestBody NewWantedProduct newWantedProduct) {
@@ -33,6 +34,12 @@ public class WantedProductController {
   @ResponseStatus(OK)
   public WantedProduct getWantedProduct(@PathVariable String wantedProductId) {
     return wantedProductService.getWantedProduct(wantedProductId);
+  }
+
+  @GetMapping("/wishlist/{wishlistId}")
+  @ResponseStatus(OK)
+  public List<WantedProduct> getAllWantedProducts(@PathVariable String wishlistId) {
+    return wantedProductService.getAllWantedProducts(wishlistId);
   }
 
 }

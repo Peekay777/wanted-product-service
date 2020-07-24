@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 import com.koutsios.wantedproductservice.domain.WantedProduct;
 import com.koutsios.wantedproductservice.exception.WantedProductNotFoundException;
 import com.koutsios.wantedproductservice.repository.WantedProductRepository;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,7 @@ class WantedProductServiceImplTest {
   @Test
   @DisplayName("createWantedProduct - Create new wishlist successfully")
   void createWantedProduct_success() {
-    when(repository.save(any(WantedProduct.class))).thenReturn(aWantedProduct());
+    when(repository.save(any(WantedProduct.class))).thenReturn(aWantedProduct("generatedId"));
 
     WantedProduct actualWantedProduct = wantedProductService.createWantedProduct("wishlistId", aNewWantedProduct());
 
@@ -46,8 +48,8 @@ class WantedProductServiceImplTest {
 
   @Test
   @DisplayName("getWantedProduct - Retrieve wanted product successfully")
-  void getWishlist_success() {
-    WantedProduct expectedWantedProduct = aWantedProduct();
+  void getWantedProduct_success() {
+    WantedProduct expectedWantedProduct = aWantedProduct("generatedId");
     when(repository.findById(anyString())).thenReturn(of(expectedWantedProduct));
 
     WantedProduct actualWantedProduct = wantedProductService.getWantedProduct("generatedId");
@@ -59,11 +61,26 @@ class WantedProductServiceImplTest {
 
   @Test
   @DisplayName("getWantedProduct - Invalid wanted product - WantedProductNotFoundException")
-  void getWishlist_invalidWantedId() {
+  void getWantedProduct_invalidWantedId() {
     when(repository.findById(anyString())).thenReturn(empty());
 
     assertThrows(WantedProductNotFoundException.class, () -> wantedProductService.getWantedProduct("generatedId"));
 
     verify(repository).findById(anyString());
+  }
+
+  @Test
+  @DisplayName("getAllWantedProducts - Retrieve all wantedproducts for a wishlist")
+  void getAllWantedProducts_success() {
+    List<WantedProduct> wantedProducts = Arrays.asList(
+        aWantedProduct("generatedId1"),
+        aWantedProduct("generatedId2")
+    );
+    when(repository.findByWishlistId(anyString())).thenReturn(wantedProducts);
+
+    List<WantedProduct> actualWantedProduct = wantedProductService.getAllWantedProducts("wishlistId");
+
+    assertEquals(2, actualWantedProduct.size());
+    verify(repository).findByWishlistId(anyString());
   }
 }

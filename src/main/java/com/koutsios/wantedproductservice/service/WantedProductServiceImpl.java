@@ -4,6 +4,7 @@ import com.koutsios.wantedproductservice.domain.WantedProduct;
 import com.koutsios.wantedproductservice.dto.NewWantedProduct;
 import com.koutsios.wantedproductservice.exception.WantedProductNotFoundException;
 import com.koutsios.wantedproductservice.repository.WantedProductRepository;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,11 @@ public class WantedProductServiceImpl implements WantedProductService {
   public WantedProduct getWantedProduct(String wantedProductId) {
     return repository.findById(wantedProductId)
         .orElseThrow(() -> new WantedProductNotFoundException(wantedProductId));
+  }
+
+  @Override
+  public List<WantedProduct> getAllWantedProducts(String wishlistId) {
+    return repository.findByWishlistId(wishlistId);
   }
 
 }
